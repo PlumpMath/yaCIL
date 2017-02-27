@@ -33,6 +33,7 @@ namespace rcrml
 			B2L[_data[0]] = (byte)_data[1];
 		}
 
+		//group opcodes
 		static private void G(int _base,int _range, int _size)
 		{
 			int i = 0;
@@ -60,29 +61,32 @@ namespace rcrml
 		{
 			//opcodes that does not accept modRMSIB
 
-			G(0x40,7,1);
-			G(0x48,7,1);
-			G(0x50,7,1);
-			G(0x58,7,1);
+			//opcode groups
+			G(0x40,7,1); //push
+			G(0x48,7,1); //pop
+			G(0x50,7,1); //inc
+			G(0x58,7,1); //dec
 
-			G(0xB0,7,2);
+			G(0xB0,7,2); //mov8
 
-			G(0xB8,7,5);
+			G(0xB8,7,5); //mov32
 
+			//yes all group is rel32
+			//this is extension opcode 0F80 not just 80
+			//it's mov opcodes, all
 			G(0x80,15,6,true);
 
 			O (0xC3, 1); //RET
 			O (0xC9, 1); //LEAVE
 			O (0x90, 1); //NOP
 
-			O (0x99, 1); //w22w
+			O (0x99, 1); //Convert Word to Doubleword
 
-			O (0xEB, 2);
+			O (0xEB, 2); //jump rel8
 
-			O (0x6A, 2);
+			O (0x6A, 2); //push8
 
 			O (0x75, 2);
-			O (0xEB, 2);
 
 			O (0x68, 5); //push word
 
@@ -91,8 +95,8 @@ namespace rcrml
 
 			O (0x25, 5);
 
-			O(0x83,IM1);
-			O(0xC7,IM4);
+			O(0x83,IM1); //rm + imm8
+			O(0xC7,IM4); //mov + rm + imm32
 		}
 
 		static public int GetOpcodeLenght (int _base, params byte[] _data)
