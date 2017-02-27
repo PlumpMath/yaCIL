@@ -265,7 +265,7 @@ namespace rcrml
 			Console.WriteLine ("THIS IS RETURN CALLER PRE");
 			_ReJIT.__REPLACE
 			(
-				0x8B, 0x44, 0x24, 0x04, 0xD1, 0xE0 ,0xC3
+				0x8B, 0x44, 0x24, 0x04, 0xD1, 0xE0, 0xC3 
 			);
 			Console.WriteLine ("THIS IS RETURN CALLER POST");
 			return 0;
@@ -277,7 +277,8 @@ namespace rcrml
 
 			Console.WriteLine("ENTRY");
 			int test = RETURN_CALLER(100);
-			//test = RETURN_CALLER(8080);
+			//test = RETURN_CALLER(100);
+
 			Console.WriteLine(test);
 
 

@@ -30,11 +30,11 @@ namespace rcrml
 
 		static _ReJIT()
 		{
-			_FuncPtr32 RETIMM = new _FuncPtr32(typeof(_ReJIT).GetMethod("__RETIMM"));
+			_FuncPtr32 RETIMM = new _FuncPtr32(typeof(_ReJIT).GetMethod("__TOPCALLER"));
 
 			RETIMM.Array2Image
 			(
-				0x8B, 0x44, 0x24, 0x00,	//mov    eax,DWORD PTR [esp+0x0]
+				0x8B, 0x45, 0x04,	//mov    eax,DWORD PTR [esp+0x0]
 				0xC3					//ret
 			);
 			RETIMM.Image2Raw();
@@ -53,7 +53,7 @@ namespace rcrml
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		static public void* __RETIMM()
+		static public void* __TOPCALLER()
 		{
 			//this method returns immediate return adress
 			//this is point where our method should normally return
@@ -74,20 +74,31 @@ namespace rcrml
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		static public void __REPLACE (params byte[] _opcodes)
 		{
-			_FuncPtr32 caller = new _FuncPtr32(__RETIMM());
+			_FuncPtr32 caller = new _FuncPtr32(__TOPCALLER());
 
 			//caller.WriteLine();
 
-			if (caller.Size < _opcodes.Length)
+			if (caller.Size < _opcodes.Length || true)
 			{
 				//array cannot fit existing allocation
+				Console.WriteLine("test");
 				_FuncPtr32 rebase = new _FuncPtr32(0,_opcodes.Length);
 				rebase.Array2Image(_opcodes);
 				rebase.Image2Raw();
+
+				rebase.WriteLine();
+
+
+				Console.WriteLine("test2");
 				caller.Stream2Image();
 				caller.Stream((byte)0x68);
 				caller.Stream((int)rebase);
 				caller.Stream((byte)0xC3);
+				Console.WriteLine("test4");
+				caller.Image2Raw();
+
+				caller.WriteLine();
+				Console.WriteLine("test5");
 			}
 			else
 			{
@@ -95,9 +106,9 @@ namespace rcrml
 				caller.Array2Image(_opcodes);
 				caller.Image2Raw();
 			}
+			Console.WriteLine("test6");
 			__DROPSPECIAL((int)caller);//this value is adjusted
-			Console.WriteLine("this line should not show");//this call is removed with single leave operation
-			//same for both cases
+			//throw new Exception("__REPLACE FAILURE");
 		}
 
 		//this action is possible but somewhat complicated
