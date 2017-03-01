@@ -9,7 +9,7 @@ namespace rcrml
 {
 
 	//this is function pointer class (not struct) for 32 bit platform
-
+	//it uses stuct layout to ensure placement of alligned pointer into first slot
 	[StructLayout(LayoutKind.Sequential)]
 	unsafe public class _FuncPtr32
 	{
@@ -19,6 +19,7 @@ namespace rcrml
 		//this is third word actually, mod 8\16
 		private void* funcptr_alligned;
 		private void* funcptr_provided;
+		private void* funcptr_previous;
 
 		private int 		malloc_size;
 		private int 		stream_offset;
@@ -39,14 +40,27 @@ namespace rcrml
 
 		//used to construct fully unmanaged functions
 		//called when constructor provides non zero size and zero pointer
+		//can be called on existing function
+		//existing functions will get function_image stored
 		public void Rebase(int _size)
 		{
+			Raw2Image();//noop for null functions
 			long ret = (long)RWX_MEM + RWX_TOP;
 			RWX_TOP += _size;
 
+			funcptr_previous = funcptr_alligned;
 			funcptr_alligned = (void*)((long)RWX_MEM + RWX_TOP);
 			funcptr_provided = (void*)((long)RWX_MEM + RWX_TOP);
+			function_vm_object = null;
 			malloc_size = _size;
+		}
+
+		public void Rebase()
+		{
+			if (malloc_size == 0)
+				return;
+		
+			Rebase(malloc_size);
 		}
 
 		//semi constructors:
@@ -402,28 +416,46 @@ namespace rcrml
 			}
 		}
 			
-	//	public _FuncPtr32 __REBASE()
-	//	{
-			//Raw2Image ();
-			//_FuncPtr32 rebased = new _FuncPtr32 (ReserveRWX (malloc_size),malloc_size);
 
-			//int delta = (int)funcptr_alligned - (int)rebased;
+		//rebind routine will update "call relative imm32" inside current function image
+		//if no function image exists, noop
 
-			//Console.WriteLine ("delta is " + delta);
-
-			//rebased.function_image = function_image;
-
-			//Console.WriteLine ("array lenght is " + rebased.function_image.Length);
-
-			//_X68.Update__CALLR (delta, rebased.function_image);
-
-			//return rebased;
-	//	}
-
-		public IntPtr __CALL()
+		public void Rebind()
 		{
-			//new _ReJIT (0x8B, 0x44, 0x24, 0x04, 0x8B, 0x40, 0x08, 0xFF, 0xD0, 0xC3);
-			return new IntPtr (0);
+			if (funcptr_previous == (void*)0)
+				return;
+
+			if (function_image == null)
+				return;
+
+			int delta = (int)funcptr_previous - (int)funcptr_alligned; //works properly
+
+			//UInt64 delta = (UInt64)funcptr_alligned - (UInt64)funcptr_previous; //cause crash
+
+			//expose directly
+			Backup2Image();
+			_X68.Update__CALLR (delta, function_image);
+			Image2Raw();//write rebinded function into native memory
+		}
+			
+		//discard current stackframe and then jumps into function
+		public void __HOST()
+		{
+			_ReJIT.__REPLACE (0x8B, 0x44, 0x24, 0x04, 0x8B, 0x40, 0x08, 0xC9, 0xFF, 0xE0);
+		}
+
+		//jump into current function's code
+		public void __JMP()
+		{
+			_ReJIT.__REPLACE (0x8B, 0x44, 0x24, 0x04, 0x8B, 0x40, 0x08, 0xFF, 0xE0);
+		}
+
+		//push return pointer into stack
+		//this decreases esp by additional 4
+		//no effect on arguments and codeflow, left for reference
+		public void __CALL()
+		{
+			_ReJIT.__REPLACE (0x8B, 0x44, 0x24, 0x04, 0x8B, 0x40, 0x08, 0xFF, 0xD0, 0xC3);
 		}
 			
 	}

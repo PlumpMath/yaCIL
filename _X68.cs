@@ -17,6 +17,8 @@ namespace rcrml
 		static public byte IM1 = 0x40;
 		static public byte IM4 = 0x80;
 
+		static public byte CALLR = 0xE8;
+
 		static private byte T2 = (1<<7) + (1<<6);
 		//static private byte M3 = (1<<5) + (1<<4) + (1<<3);
 		static private byte B3 = (1<<2) + (1<<1) + (1<<0);
@@ -90,7 +92,7 @@ namespace rcrml
 
 			O (0x68, 5); //push word
 
-			O (0xE8, 5); //call relative word
+			O (CALLR, 5); //call relative word
 			O (0xE9, 5); //jump relative word
 
 			O (0x25, 5);
@@ -213,14 +215,14 @@ namespace rcrml
 
 			while (true) 
 			{
-				if (_source [walk] == 0xE8)
+				if (_source [walk] == CALLR)
 				{
 					compositeBREF [0] = _source [walk + 1];
 					compositeBREF [1] = _source [walk + 2];
 					compositeBREF [2] = _source [walk + 3];
 					compositeBREF [3] = _source [walk + 4];
-					//composite += delta;
-					composite = 0;
+					composite += delta;
+					//composite = 0;
 					_source [walk + 1] = compositeBREF [0];
 					_source [walk + 2] = compositeBREF [1];
 					_source [walk + 3] = compositeBREF [2];
@@ -230,9 +232,10 @@ namespace rcrml
 
 				tmp = GetOpcodeLenght (walk, _source);
 
-				Console.WriteLine ("OPCODE " + string.Format ("{0:X2}",_source [walk]) + " size " + tmp);
+				//Console.WriteLine ("OPCODE " + string.Format ("{0:X2}",_source [walk]) + " size " + tmp);
 
 
+				//will never trigger due to current implementation
 				if (tmp == -1) 
 				{
 					Console.WriteLine ("FAILED AT " + walk + "@" + string.Format ("{0:X2}", walk));

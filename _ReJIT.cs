@@ -60,7 +60,7 @@ namespace rcrml
 			//unframed method (running inside frame of caller)
 			//used to determinate caller
 			//reflection is unsupported for now
-			throw new Exception("__RETIMM FAILURE");
+			throw new Exception("__TOPCALLER FAILURE");
 		}
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		static public int __DROPSPECIAL(int _jump_abs)
@@ -78,10 +78,10 @@ namespace rcrml
 
 			//caller.WriteLine();
 
-			if (caller.Size < _opcodes.Length || true)
+			if (caller.Size < _opcodes.Length) //|| true)
 			{
 				//array cannot fit existing allocation
-				Console.WriteLine("test");
+				//Console.WriteLine("test");
 				_FuncPtr32 rebase = new _FuncPtr32(0,_opcodes.Length);
 				rebase.Array2Image(_opcodes);
 				rebase.Image2Raw();
@@ -89,16 +89,16 @@ namespace rcrml
 				rebase.WriteLine();
 
 
-				Console.WriteLine("test2");
+				//Console.WriteLine("test2");
 				caller.Stream2Image();
 				caller.Stream((byte)0x68);
 				caller.Stream((int)rebase);
 				caller.Stream((byte)0xC3);
-				Console.WriteLine("test4");
+				//Console.WriteLine("test4");
 				caller.Image2Raw();
 
 				caller.WriteLine();
-				Console.WriteLine("test5");
+				//Console.WriteLine("test5");
 			}
 			else
 			{
@@ -106,7 +106,7 @@ namespace rcrml
 				caller.Array2Image(_opcodes);
 				caller.Image2Raw();
 			}
-			Console.WriteLine("test6");
+			//Console.WriteLine("test6");
 			__DROPSPECIAL((int)caller);//this value is adjusted
 			//throw new Exception("__REPLACE FAILURE");
 		}
