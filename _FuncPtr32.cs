@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Reflection;
 using System.Text;
 
-namespace rcrml
+namespace yacil
 {
 
 	//this is function pointer class (not struct) for 32 bit platform
@@ -456,6 +456,11 @@ namespace rcrml
 		public void __CALL()
 		{
 			_ReJIT.__REPLACE (0x8B, 0x44, 0x24, 0x04, 0x8B, 0x40, 0x08, 0xFF, 0xD0, 0xC3);
+		}
+
+		public void __RETNOW()
+		{
+			_ReJIT.__REPLACE ( 0x83, 0xEC, 0x04, 0xC3 );
 		}
 			
 	}

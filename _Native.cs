@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace rcrml
+namespace yacil
 {
 	public unsafe class _Native
 	{

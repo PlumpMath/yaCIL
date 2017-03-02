@@ -4,7 +4,7 @@ using System.Threading;
 using RimWorld;
 using System.Reflection;
 
-namespace rcrml
+namespace yacil
 {
 	[StaticConstructorOnStartup]
 	public class _FailSafe
